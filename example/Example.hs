@@ -1,6 +1,6 @@
 #!/usr/bin/env runghc
 import Control.Monad (foldM, liftM, liftM2, void)
-import Gen
+import Genskell
   ( addExtension
   , tcallProcess
   , tcreateDirectoryIfMissing

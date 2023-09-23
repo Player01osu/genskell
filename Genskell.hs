@@ -1,4 +1,4 @@
-module Gen ( checkIncremental
+module Genskell ( checkIncremental
            , globFiles
            , getModificationTime
            , incrementalExecute
