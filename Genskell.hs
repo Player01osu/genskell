@@ -1,20 +1,20 @@
 module Genskell ( checkIncremental
-           , globFiles
-           , getModificationTime
-           , incrementalExecute
-           , parseSubCommands
-           , quoteString
-           , stdoutCmd
-           , tcallProcess
-           , callProcess
-           , tcreateDirectoryIfMissing
-           , trace
-           , tremovePathForcibly
-           , tstdoutCmd
-           , addExtension
-           , joinPath
-           , takeBaseName
-           , fileExist ) where
+                , globFiles
+                , getModificationTime
+                , incrementalExecute
+                , parseSubCommands
+                , quoteString
+                , stdoutCmd
+                , tcallProcess
+                , callProcess
+                , tcreateDirectoryIfMissing
+                , trace
+                , tremovePathForcibly
+                , tstdoutCmd
+                , addExtension
+                , joinPath
+                , takeBaseName
+                , fileExist ) where
 
 import System.Process ( callProcess
                       , readProcess )
