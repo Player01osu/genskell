@@ -2,27 +2,30 @@
 import Control.Monad (foldM, liftM, liftM2, void)
 import Genskell
   ( addExtension
-  , tcallProcess
-  , tcreateDirectoryIfMissing
   , globFiles
   , incrementalExecute
   , incrementalForEach
   , joinPath
-  , tremovePathForcibly
-  , takeBaseName
   , parseSubCommands
+  , takeBaseName
+  , tcallProcess
+  , tcreateDirectoryIfMissing
+  , tremovePathForcibly
   )
 
-buildDir  = "build"
+buildDir = "build"
+
 targetDir = "target"
-bin       = "main"
 
-srcs     :: IO [String]
-objs     :: IO [String]
+bin = "main"
+
+srcs :: IO [String]
+objs :: IO [String]
 srcsObjs :: IO [(String, String)]
+srcs = globFiles "./" "*.c"
 
-srcs     = globFiles "./" "*.c"
-objs     = srcs >>= return . map objName
+objs = srcs >>= return . map objName
+
 srcsObjs = liftM2 zip srcs objs
 
 objName src = joinPath [buildDir, addExtension (takeBaseName src) "o"]
@@ -33,14 +36,17 @@ compileObj inc@(input, output) =
       args = ["-c", "-o", output, input]
    in incrementalExecute inc cmd args
 
-createBuildDir  = tcreateDirectoryIfMissing True buildDir
+createBuildDir = tcreateDirectoryIfMissing True buildDir
+
 createTargetDir = tcreateDirectoryIfMissing True targetDir
-createObj       = srcsObjs >>= incrementalForEach compileObj
+
+createObj = srcsObjs >>= incrementalForEach compileObj
 
 linkObj =
   objs >>= \x -> tcallProcess "clang" $ ["-o", joinPath [targetDir, bin]] <> x
 
 cleanBuildDir = tremovePathForcibly buildDir
+
 cleanTargetDir = tremovePathForcibly targetDir
 
 build = do
@@ -60,11 +66,10 @@ run = do
   tcallProcess (joinPath [targetDir, bin]) []
 
 defaultSubCommand = build
+
 runSubCommands =
   parseSubCommands
-    [ (["b", "build"], build)
-    , (["c", "clean"], clean)
-    , (["r", "run"], run)]
+    [(["b", "build"], build), (["c", "clean"], clean), (["r", "run"], run)]
     defaultSubCommand
 
 main = runSubCommands
