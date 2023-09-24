@@ -28,7 +28,8 @@ import System.Environment (getArgs)
 import System.FilePath.Posix (FilePath)
 import System.FilePath.Posix (addExtension, joinPath, takeBaseName)
 import System.Posix.Files (fileExist, getFileStatus, modificationTime)
-import Text.Printf (printf)
+import System.Posix.Types (EpochTime)
+import Text.Printf (printf, PrintfArg)
 
 type SubCommands = [([String], IO ())]
 
@@ -58,10 +59,10 @@ checkIncremental (src, out) =
 globFiles :: String -> String -> IO [String]
 globFiles path pattern = stdoutCmd "find" [path, "-name", pattern] ""
 
-getModificationTime :: FilePath -> IO System.Posix.Types.EpochTime
+getModificationTime :: FilePath -> IO EpochTime
 getModificationTime path = (getFileStatus path) >>= return . modificationTime
 
-quoteString :: String
+quoteString :: String -> String
 quoteString = printf "'%s'"
 
 stdoutCmd :: FilePath -> [String] -> String -> IO [String]
@@ -70,7 +71,7 @@ stdoutCmd cmd args stdin = (readProcess cmd args stdin) >>= return . lines
 tstdoutCmd :: FilePath -> [String] -> String -> IO [String]
 tstdoutCmd cmd args stdin = trace cmd args >> stdoutCmd cmd args stdin
 
-callProcess :: FilePath -> [String] -> IO ()
+tcallProcess :: FilePath -> [String] -> IO ()
 tcallProcess cmd args = trace cmd args >> callProcess cmd args
 
 tcreateDirectoryIfMissing :: Bool -> FilePath -> IO ()
@@ -82,7 +83,7 @@ tremovePathForcibly :: FilePath -> IO ()
 tremovePathForcibly path =
   (putStrLn $ printf "Removing: %s" path) >> removePathForcibly path
 
-trace :: Text.Printf.PrintfArg t => t -> [String] -> IO ()
+trace :: PrintfArg t => t -> [String] -> IO ()
 trace cmd args = putStrLn $ printf "%s %s" cmd $ unwords $ map quoteString args
 
 mor :: IO Bool -> IO Bool -> IO Bool
