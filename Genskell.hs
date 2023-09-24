@@ -2,6 +2,7 @@ module Genskell ( checkIncremental
                 , globFiles
                 , getModificationTime
                 , incrementalExecute
+                , incrementalForEach
                 , parseSubCommands
                 , quoteString
                 , stdoutCmd
@@ -25,7 +26,8 @@ import System.Directory ( createDirectoryIfMissing
 import System.FilePath.Posix ( FilePath )
 import Text.Printf ( printf )
 import System.Environment ( getArgs )
-import Control.Monad ( liftM2 )
+import Control.Monad ( liftM2
+                     , foldM )
 import System.Posix.Files ( modificationTime
                           , getFileStatus
                           , fileExist )
@@ -69,6 +71,11 @@ tremovePathForcibly path =
 trace cmd args = putStrLn $ printf "%s %s" cmd $ unwords $ map quoteString args
 
 type Incremental = (FilePath, FilePath)
+
+mor = liftM2 (||)
+
+incrementalForEach :: (a -> IO Bool) -> [a] -> IO Bool
+incrementalForEach f = foldM (\x y -> mor (return x) (f y)) False
 
 incrementalExecute incremental cmd args =
   ifM (checkIncremental incremental)

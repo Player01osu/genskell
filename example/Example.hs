@@ -6,6 +6,7 @@ import Genskell
   , tcreateDirectoryIfMissing
   , globFiles
   , incrementalExecute
+  , incrementalForEach
   , joinPath
   , tremovePathForcibly
   , takeBaseName
@@ -26,8 +27,6 @@ srcsObjs = liftM2 zip srcs objs
 
 objName src = joinPath [buildDir, addExtension (takeBaseName src) "o"]
 
-mor = liftM2 (||)
-
 compileObj :: (String, String) -> IO Bool
 compileObj inc@(input, output) =
   let cmd = "clang"
@@ -36,7 +35,7 @@ compileObj inc@(input, output) =
 
 createBuildDir  = tcreateDirectoryIfMissing True buildDir
 createTargetDir = tcreateDirectoryIfMissing True targetDir
-createObj       = srcsObjs >>= foldM (\x y -> mor (return x) (compileObj y)) False
+createObj       = srcsObjs >>= incrementalForEach compileObj
 
 linkObj =
   objs >>= \x -> tcallProcess "clang" $ ["-o", joinPath [targetDir, bin]] <> x
